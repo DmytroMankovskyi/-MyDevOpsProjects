@@ -1,0 +1,25 @@
+---
+- name: Create EC2 instance
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tasks:
+
+    - name: Launch EC2
+      amazon.aws.ec2_instance:
+        name: wordpress-server
+        region: eu-central-1
+        key_name: mykey
+        instance_type: t2.micro
+        image_id: ami-022814934cf926361
+        wait: yes
+        count: 1
+        tags:
+          Project: wordpress
+      register: ec2
+
+    - name: Add new instance to inventory
+      add_host:
+        hostname: "{{ ec2.instances[0].public_ip_address }}"
+        groupname: wordpress

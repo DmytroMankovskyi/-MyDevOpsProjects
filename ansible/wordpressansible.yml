@@ -1,0 +1,50 @@
+- name: Install WordPress on EC2
+  hosts: wordpress
+  become: yes
+  remote_user: ubuntu 
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name:
+          - nginx
+          - mysql-server
+          - php
+          - php-cli
+          - php-mysql
+          - php-curl
+          - php-gd
+          - php-mbstring
+          - php-xml
+          - php-xmlrpc
+          - unzip
+          - curl
+        state: present
+        update_cache: yes
+
+    - name: Download latest WordPress
+      get_url:
+        url: https://wordpress.org/latest.zip
+        dest: /tmp/wordpress.zip
+
+    - name: Unzip WordPress
+      unarchive:
+        src: /tmp/wordpress.zip
+        dest: /var/www/html/
+        remote_src: yes
+
+    - name: Set proper permissions
+      file:
+        path: /var/www/html/wordpress
+        owner: www-data
+        group: www-data
+        recurse: yes
+
+    - name: Restart nginx
+      service:
+        name: nginx
+        state: restarted
